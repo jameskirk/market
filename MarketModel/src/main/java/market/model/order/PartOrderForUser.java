@@ -7,11 +7,12 @@ import market.model.task.Task;
 
 public class PartOrderForUser {
 	
-	public User user;
+	public int userId;
+	
+	public boolean admin;
 	
 	public List<ProductWithQuantity> productList;
 	
 	public List<Task> taskList;
 	
-
 }
