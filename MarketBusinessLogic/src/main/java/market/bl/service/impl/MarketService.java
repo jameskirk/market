@@ -14,6 +14,7 @@ import market.model.constant.OrderState;
 import market.model.constant.TaskName;
 import market.model.constant.TaskState;
 import market.model.order.Order;
+import market.model.order.PartOrderForUser;
 import market.model.security.User;
 import market.model.task.Task;
 
@@ -40,7 +41,55 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	dao.saveOrUpdate(order);
 	
 	//create tasks
-	order.partOrderForUserList.get(0).taskList = new ArrayList<Task>();
+	order.partOrderForUserList.get(0).taskList = generateDefaultTaskList();
+	
+    }
+
+    @Override
+    public Order getOrder(int id) {
+	return dao.get(id, Order.class);
+    }
+
+    @Override
+    public void modifyOrder(Order order) throws MarketException {
+	
+	Order oldOrder = getOrder(order.id);
+	
+	int oldSize = oldOrder.partOrderForUserList.size();
+	int size = order.partOrderForUserList.size();
+	if (oldSize < size) {
+	    if (order.taskName != TaskName.REQUEST_PRICE_LIST && order.taskName != TaskName.CHOICE_PRODUCTS ) {
+		throw new MarketException("can not add new users when order is not in " + TaskName.REQUEST_PRICE_LIST + TaskName.CHOICE_PRODUCTS);
+	    }
+	    
+	    for (int i = oldSize; i < size; i++) {
+		PartOrderForUser partOrder = order.partOrderForUserList.get(i);
+		if (dao.get(partOrder.userId, User.class) == null) {
+		    throw new MarketException("user must be exist in database");
+		}
+		partOrder.admin = false;
+		
+		partOrder.taskList = generateDefaultTaskList();
+		if (order.taskName == TaskName.CHOICE_PRODUCTS) {
+		    partOrder.taskList.get(0).taskState = TaskState.PASSED;
+		    partOrder.taskList.get(1).taskState = TaskState.RUNNING;
+		}
+	    }
+	}
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void resumeTask(Task task) {
+	// TODO Auto-generated method stub
+	
+    }
+
+    public IMarketDao getDao() {
+        return dao;
+    }
+    
+    private List<Task> generateDefaultTaskList() {
 	Task task0 = new Task();
 	task0.id = 0; // lastId
 	task0.taskName = TaskName.REQUEST_PRICE_LIST;
@@ -66,28 +115,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	task4.taskName = TaskName.SHIPPING;
 	task4.taskState = TaskState.NOT_STARTED;
 
-	order.partOrderForUserList.get(0).taskList.addAll(Arrays.asList(task1, task2, task3, task4));
-	
-    }
-
-    @Override
-    public Order getOrder(int id) {
-	return dao.get(id, Order.class);
-    }
-
-    @Override
-    public void modifyOrder(Order order) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void resumeTask(Task task) {
-	// TODO Auto-generated method stub
-	
-    }
-
-    public IMarketDao getDao() {
-        return dao;
+	return Arrays.asList(task1, task2, task3, task4);
     }
     
 

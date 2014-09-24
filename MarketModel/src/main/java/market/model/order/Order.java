@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import market.model.constant.OrderState;
+import market.model.constant.TaskName;
 
 public class Order {
 
@@ -12,6 +13,8 @@ public class Order {
     public List<PartOrderForUser> partOrderForUserList;
 
     public OrderState orderState;
+    
+    public TaskName taskName;
 
     public Date createdDate;
 

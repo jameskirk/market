@@ -9,6 +9,6 @@ public interface IMarketOrderService {
 
 	public Order getOrder(int id);
 
-	public void modifyOrder(Order order);
+	public void modifyOrder(Order order) throws MarketException;
 
 }
