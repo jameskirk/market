@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import market.model.constant.OrderState;
-import market.model.constant.TaskName;
 
 public class Order {
 

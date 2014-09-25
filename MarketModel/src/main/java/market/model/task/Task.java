@@ -8,6 +8,8 @@ public class Task {
     public int id;
     
     public int orderId;
+    
+    public int userId;
 
     public TaskName taskName;
 
