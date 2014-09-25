@@ -1,6 +1,5 @@
 package market.bl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -52,36 +51,79 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 
     @Override
     public void modifyOrder(Order order) throws MarketException {
-	
 	Order oldOrder = getOrder(order.id);
 	
+	if (oldOrder == null) {
+		throw new MarketException("order with id does not exist: " + order.id);
+	}
+	
+	if (oldOrder.orderState != order.orderState) {
+		throw new MarketException("you can not change order state");
+	}
+	
+	// handle new user
 	int oldSize = oldOrder.partOrderForUserList.size();
 	int size = order.partOrderForUserList.size();
 	if (oldSize < size) {
-	    if (order.taskName != TaskName.REQUEST_PRICE_LIST && order.taskName != TaskName.CHOICE_PRODUCTS ) {
-		throw new MarketException("can not add new users when order is not in " + TaskName.REQUEST_PRICE_LIST + TaskName.CHOICE_PRODUCTS);
+		
+		TaskName mainTaskName = null;
+		for (Task task: order.partOrderForUserList.get(0).taskList) {
+			if (task.taskState == TaskState.RUNNING) {
+				mainTaskName = task.taskName;
+				break;
+			}
+		}
+		
+	    if (mainTaskName != TaskName.REQUEST_PRICE_LIST && mainTaskName != TaskName.CHOICE_PRODUCTS ) {
+	    	throw new MarketException("can not add new users when order is not in " 
+	    			+ TaskName.REQUEST_PRICE_LIST + TaskName.CHOICE_PRODUCTS);
 	    }
 	    
 	    for (int i = oldSize; i < size; i++) {
-		PartOrderForUser partOrder = order.partOrderForUserList.get(i);
-		if (dao.get(partOrder.userId, User.class) == null) {
-		    throw new MarketException("user must be exist in database");
-		}
-		partOrder.admin = false;
-		
-		partOrder.taskList = generateDefaultTaskList();
-		if (order.taskName == TaskName.CHOICE_PRODUCTS) {
-		    partOrder.taskList.get(0).taskState = TaskState.PASSED;
-		    partOrder.taskList.get(1).taskState = TaskState.RUNNING;
-		}
+			PartOrderForUser partOrder = order.partOrderForUserList.get(i);
+			if (dao.get(partOrder.userId, User.class) == null) {
+			    throw new MarketException("user must be exist in database");
+			}
+			partOrder.admin = false;
+			
+			partOrder.taskList = generateDefaultTaskList();
+			if (mainTaskName == TaskName.CHOICE_PRODUCTS) {
+			    partOrder.taskList.get(0).taskState = TaskState.PASSED;
+			    partOrder.taskList.get(1).taskState = TaskState.RUNNING;
+			}
 	    }
 	}
-	throw new UnsupportedOperationException();
+	dao.saveOrUpdate(oldOrder);
     }
 
     @Override
     public void resumeTask(Task task) {
-	// TODO Auto-generated method stub
+    	Order order = dao.get(task.orderId, Order.class);
+    	
+    	PartOrderForUser part = null;
+    	for (PartOrderForUser p: order.partOrderForUserList) {
+    		for (Task t: p.taskList) {
+    			if (t.id == task.id) {
+    				part = p;
+    			}
+    		}
+    	}
+    	
+    	// handle admin's task
+    	if (part.admin) {
+    		if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
+    			
+    		} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
+
+    		} else if(task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
+
+    		} else if(task.taskName == TaskName.WAITING_BITTING) {
+
+    		} else if(task.taskName == TaskName.SHIPPING) {
+    			
+    		}
+
+    	}
 	
     }
 

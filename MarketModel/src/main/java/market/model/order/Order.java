@@ -14,8 +14,6 @@ public class Order {
 
     public OrderState orderState;
     
-    public TaskName taskName;
-
     public Date createdDate;
 
     public Date stopDate;
