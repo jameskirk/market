@@ -14,5 +14,7 @@ public class Task {
     public TaskName taskName;
 
     public TaskState taskState;
+    
+    public String priceListUrl;
 
 }

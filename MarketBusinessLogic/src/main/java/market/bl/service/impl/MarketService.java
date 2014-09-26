@@ -121,23 +121,35 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 		part = p;
 	    }
 	}
-    	
-    	// handle admin's task
-    	if (part.admin) {
-    		if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
-    			
-    		} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
 
-    		} else if(task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
-
-    		} else if(task.taskName == TaskName.WAITING_BITTING) {
-
-    		} else if(task.taskName == TaskName.SHIPPING) {
-    			
-    		}
-
-    	}
-	
+	// handle admin's task
+	if (part.admin) {
+		if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
+			if (task.priceListUrl == null || task.priceListUrl.isEmpty()) {
+				throw new MarketException("price list url must be filled");
+			}
+			// go to next task for all users
+			for (PartOrderForUser p: order.partOrderForUserList) {
+				List<Task> taskList = getTaskList(task.orderId, p.userId);
+				for (int i = 0; i < taskList.size() - 1; i++) {
+					Task t = taskList.get(i);
+					Task tNext = taskList.get(i + 1);
+					if (t.taskName == TaskName.REQUEST_PRICE_LIST && t.taskState == TaskState.RUNNING) {
+						t.taskState = TaskState.PASSED;
+						tNext.taskState = TaskState.RUNNING;
+						dao.saveOrUpdate(t);
+						dao.saveOrUpdate(tNext);
+					}
+				}
+			}
+			
+			
+		} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
+		} else if (task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
+		} else if (task.taskName == TaskName.WAITING_BITTING) {
+		} else if (task.taskName == TaskName.SHIPPING) {
+		}
+	}
     }
 
     public IMarketDao getDao() {
