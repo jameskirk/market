@@ -2,6 +2,9 @@ package market.bl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -112,6 +115,17 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
     	// SELECT task t from Task t WHERE t.orderId = :orderId and t.userId =: userId
     	List<Task> retVal = new ArrayList<Task>();
     	List<Task> allTask = dao.getAll(Task.class);
+    	// dirty hack, need correct order, sort by id
+    	Collections.sort(allTask, new Comparator<Task>() {
+			@Override
+			public int compare(Task o1, Task o2) {
+				if (o1.id > o2.id)
+					return 1;
+				else
+					return -1;
+			}
+		});
+    	
     	for (Task t: allTask) {
     		if (t.orderId == orderId && t.userId == userId) {
     			retVal.add(t);
@@ -126,7 +140,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
     	
 	PartOrderForUser part = null;
 	for (PartOrderForUser p : order.partOrderForUserList) {
-	    if (p.userId == task.id) {
+	    if (p.userId == task.userId) {
 		part = p;
 	    }
 	}

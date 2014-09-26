@@ -1,14 +1,17 @@
 package market.bl.test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 import market.bl.exception.MarketException;
 import market.bl.service.impl.MarketService;
 import market.model.constant.OrderState;
+import market.model.constant.TaskState;
 import market.model.order.Order;
 import market.model.order.PartOrderForUser;
 import market.model.security.User;
+import market.model.task.Task;
 
 import org.junit.Test;
 
@@ -60,6 +63,26 @@ public class OrderTest {
     	
     	Assert.assertEquals(2, orderFromService.partOrderForUserList.size());
     	Assert.assertEquals(2, orderFromService.partOrderForUserList.get(1).userId);
+    }
+    
+    @Test
+    public void resumeTask0() throws MarketException {
+    	addUser();
+    	
+    	List<Task> taskList = service.getTaskList(1, 1);
+    	Assert.assertEquals(TaskState.RUNNING, taskList.get(0).taskState);
+    	taskList.get(0).priceListUrl = "http://link-to-doc.doc";
+    	
+    	service.resumeTask(taskList.get(0));
+    	
+    	taskList = service.getTaskList(1, 1);
+    	Assert.assertEquals(TaskState.PASSED, taskList.get(0).taskState);
+    	Assert.assertEquals(TaskState.RUNNING, taskList.get(1).taskState);
+    	
+    	taskList = service.getTaskList(1, 2);
+    	Assert.assertEquals(TaskState.PASSED, taskList.get(0).taskState);
+    	Assert.assertEquals(TaskState.RUNNING, taskList.get(1).taskState);
+    	
     	
     }
 	
