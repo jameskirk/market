@@ -138,16 +138,16 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
     public void resumeTask(Task task) throws MarketException {
     	Order order = dao.get(task.orderId, Order.class);
     	
-		UserOrder part = null;
+		UserOrder userOrder = null;
 		for (UserOrder p : order.userOrderList) {
 		    if (p.userId == task.userId) {
-			part = p;
+			userOrder = p;
 		    }
 		}
 
 		// handle admin's task
 		if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
-			if (part.admin) {
+			if (userOrder.admin) {
 				// admin
 				if (task.priceListUrl == null || task.priceListUrl.isEmpty()) {
 					throw new MarketException("price list url must be filled");
@@ -175,6 +175,16 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 			}
 			
 		} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
+			List<Task> taskList = getTaskList(task.orderId, task.userId);
+			for (int i = 0; i < taskList.size(); i++) {
+				if (taskList.get(i).id == task.id) {
+					taskList.get(i).taskState = TaskState.PASSED;
+					taskList.get(i + 1).taskState = TaskState.RUNNING;
+					dao.saveOrUpdate(taskList.get(i));
+					dao.saveOrUpdate(taskList.get(i + 1));
+				}
+			}
+			
 		} else if (task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
 		} else if (task.taskName == TaskName.WAITING_BITTING) {
 		} else if (task.taskName == TaskName.SHIPPING) {
