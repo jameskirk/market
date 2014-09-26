@@ -1,5 +1,6 @@
 package market.bl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +40,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	if (dao.get(partOrderForAdmin.userId, User.class) == null) {
 	    throw new MarketException("admin user must be exist in database");
 	}
-	if (partOrderForAdmin.productList != null || !partOrderForAdmin.productList.isEmpty()) {
+	if (partOrderForAdmin.productList != null) {
 	    throw new MarketException("product list must be empty for admin in order");
 	}
 	partOrderForAdmin.admin = true;
@@ -104,11 +105,19 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 		}
 	    }
 	}
-	dao.saveOrUpdate(oldOrder);
+	dao.saveOrUpdate(order);
     }
     
     public List<Task> getTaskList(int orderId, int userId) throws MarketException {
-	return null;
+    	// SELECT task t from Task t WHERE t.orderId = :orderId and t.userId =: userId
+    	List<Task> retVal = new ArrayList<Task>();
+    	List<Task> allTask = dao.getAll(Task.class);
+    	for (Task t: allTask) {
+    		if (t.orderId == orderId && t.userId == userId) {
+    			retVal.add(t);
+    		}
+    	}
+    	return retVal;
     }
 
     @Override

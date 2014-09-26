@@ -106,6 +106,32 @@ public class XmlMarketDao implements IMarketDao {
 	}
 
     }
+    
+    @Override
+    public <T> List<T> getAll(Class<T> objectClass) {
+    	try {
+    		List<T> retVal = new ArrayList<T>();
+    	    RootNode rootNode = getFromFile();
+    	    String fieldName = objectClass.getSimpleName();
+    	    List fieldList = (List<?>) rootNode.getClass().getDeclaredField(fieldName).get(rootNode);
+    	    if (fieldList == null) {
+    		rootNode.getClass().getDeclaredField(fieldName).set(rootNode, new ArrayList());
+    		fieldList = (List<?>) rootNode.getClass().getDeclaredField(fieldName).get(rootNode);
+    	    }
+
+    	    if (fieldList == null) {
+    		return null;
+    	    }
+    	    for (Object fieldObject : fieldList) {
+    		    retVal.add((T) fieldObject);
+    	    }
+    	    return retVal;
+    	} catch (JAXBException e) {
+    	    throw new RuntimeException(e);
+    	} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+    	    throw new RuntimeException(e);
+    	}
+    }
 
     @Override
     public void remove(int id, Class<?> objectClass) {

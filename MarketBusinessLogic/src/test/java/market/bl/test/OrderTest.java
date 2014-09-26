@@ -2,6 +2,7 @@ package market.bl.test;
 
 import java.util.ArrayList;
 
+import junit.framework.Assert;
 import market.bl.exception.MarketException;
 import market.bl.service.impl.MarketService;
 import market.model.constant.OrderState;
@@ -13,10 +14,11 @@ import org.junit.Test;
 
 
 public class OrderTest {
+	
+	MarketService service = new MarketService();
     
     @Test
     public void createAndStart() throws MarketException {
-	MarketService service = new MarketService();
 	
 	User user = new User();
 	user.id = 1;
@@ -35,6 +37,30 @@ public class OrderTest {
 	
 	Order orderFromService = service.getOrder(1);
 	
+    }
+    
+    @Test
+    public void addUser() throws MarketException {
+    	createAndStart();
+    	
+    	User user = new User();
+    	user.id = 2;
+    	user.name = "Bill";
+    	service.getDao().saveOrUpdate(user);
+    	
+    	Order order = service.getOrder(1);
+    	PartOrderForUser part = new PartOrderForUser();
+    	part.admin = false;
+    	part.userId = 2;
+    	order.partOrderForUserList.add(part);
+    	
+    	service.modifyOrder(order);
+    	
+    	Order orderFromService = service.getDao().get(1, Order.class);
+    	
+    	Assert.assertEquals(2, orderFromService.partOrderForUserList.size());
+    	Assert.assertEquals(2, orderFromService.partOrderForUserList.get(1).userId);
+    	
     }
 	
 }
