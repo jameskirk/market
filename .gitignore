@@ -1,2 +1,16 @@
 build/
 .gradle/
+
+target/
+
+.settings
+.classpath
+.project
+.metadata
+RemoteSystemsTempFiles
+	
+.idea
+*.iml
+
+nb-configuration.xml
+nbactions-*.xml
