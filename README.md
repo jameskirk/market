@@ -1,7 +1,7 @@
-How to setup local environment (eclipse+workspace):
+How to setup local environment and join to project:
 
 
-  1.Create dir C:\dev. Download and extract https://drive.google.com/file/d/0B19_DPbGRW2IVmZvVGNoeDFNTlU/edit?usp=sharing to C:\dev\market\
+  1.Create dir C:\dev. Download and extract (eclipse+workspace) https://drive.google.com/file/d/0B19_DPbGRW2IVmZvVGNoeDFNTlU/edit?usp=sharing to C:\dev\market\
   
   2.download and install Git: http://git-scm.com/download/win
   
