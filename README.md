@@ -1,7 +1,7 @@
 How to setup local environment (eclipse+workspace):
 
 
-  1.Create dir C:\dev. Download and extract to C:\dev\market\
+  1.Create dir C:\dev. Download and extract https://drive.google.com/file/d/0B19_DPbGRW2IVmZvVGNoeDFNTlU/edit?usp=sharing to C:\dev\market\
   
   2.download and install Git: http://git-scm.com/download/win
   
