@@ -2,7 +2,6 @@ package market.bl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,7 +16,7 @@ import market.model.constant.OrderState;
 import market.model.constant.TaskName;
 import market.model.constant.TaskState;
 import market.model.order.Order;
-import market.model.order.PartOrderForUser;
+import market.model.order.UserOrder;
 import market.model.security.User;
 import market.model.task.Task;
 
@@ -34,23 +33,23 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	order.stopExecuted = false;
 	order.shippingExecuted = false;
 	
-	// part order for admin
-	PartOrderForUser partOrderForAdmin = null;
-	if (order.partOrderForUserList == null || order.partOrderForUserList.size() > 1 
-		|| (partOrderForAdmin = order.partOrderForUserList.get(0)) == null) {
+	// validate user order for admin
+	UserOrder orderForAdmin = null;
+	if (order.userOrderList == null || order.userOrderList.size() > 1 
+		|| (orderForAdmin = order.userOrderList.get(0)) == null) {
 	    throw new MarketException("only admin user must be exist in order");
 	}
-	if (dao.get(partOrderForAdmin.userId, User.class) == null) {
+	if (dao.get(orderForAdmin.userId, User.class) == null) {
 	    throw new MarketException("admin user must be exist in database");
 	}
-	if (partOrderForAdmin.productList != null) {
+	if (orderForAdmin.productList != null) {
 	    throw new MarketException("product list must be empty for admin in order");
 	}
-	partOrderForAdmin.admin = true;
+	orderForAdmin.admin = true;
 	dao.saveOrUpdate(order);
 	
 	//create tasks
-	List<Task> adminTaskList = generateDefaultTaskList(order.id, partOrderForAdmin.userId);
+	List<Task> adminTaskList = generateDefaultTaskList(order.id, orderForAdmin.userId);
 	for (Task t: adminTaskList) {
 	    dao.saveOrUpdate(t);
 	}
@@ -59,7 +58,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 
     @Override
     public Order getOrder(int id) {
-	return dao.get(id, Order.class);
+    	return dao.get(id, Order.class);
     }
 
     @Override
@@ -69,18 +68,17 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	if (oldOrder == null) {
 		throw new MarketException("order with id does not exist: " + order.id);
 	}
-	
 	if (oldOrder.orderState != order.orderState) {
 		throw new MarketException("you can not change order state");
 	}
 	
 	// handle new user
-	int oldSize = oldOrder.partOrderForUserList.size();
-	int size = order.partOrderForUserList.size();
+	int oldSize = oldOrder.userOrderList.size();
+	int size = order.userOrderList.size();
 	if (oldSize < size) {
 
 	    TaskName mainTaskName = null;
-	    for (Task task : getTaskList(order.id, order.partOrderForUserList.get(0).userId)) {
+	    for (Task task : getTaskList(order.id, order.userOrderList.get(0).userId)) {
 		if (task.taskState == TaskState.RUNNING) {
 		    mainTaskName = task.taskName;
 		    break;
@@ -88,24 +86,26 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	    }
 
 	    if (mainTaskName != TaskName.REQUEST_PRICE_LIST && mainTaskName != TaskName.CHOICE_PRODUCTS) {
-		throw new MarketException("can not add new users when order is not in " + TaskName.REQUEST_PRICE_LIST + TaskName.CHOICE_PRODUCTS);
+	    	throw new MarketException("can not add new users when order is not in " 
+	    			+ TaskName.REQUEST_PRICE_LIST + TaskName.CHOICE_PRODUCTS);
 	    }
 
 	    for (int i = oldSize; i < size; i++) {
-		PartOrderForUser partOrder = order.partOrderForUserList.get(i);
-		if (dao.get(partOrder.userId, User.class) == null) {
-		    throw new MarketException("user must be exist in database");
-		}
-		partOrder.admin = false;
+			UserOrder partOrder = order.userOrderList.get(i);
+			if (dao.get(partOrder.userId, User.class) == null) {
+			    throw new MarketException("user must be exist in database");
+			}
+			partOrder.admin = false;
 
-		List<Task> adminTaskList = generateDefaultTaskList(order.id, partOrder.userId);
-		if (mainTaskName == TaskName.CHOICE_PRODUCTS) {
-		    adminTaskList.get(0).taskState = TaskState.PASSED;
-		    adminTaskList.get(1).taskState = TaskState.RUNNING;
-		}
-		for (Task t: adminTaskList) {
-		    dao.saveOrUpdate(t);
-		}
+			// add tasks for new user
+			List<Task> adminTaskList = generateDefaultTaskList(order.id, partOrder.userId);
+			if (mainTaskName == TaskName.CHOICE_PRODUCTS) {
+			    adminTaskList.get(0).taskState = TaskState.PASSED;
+			    adminTaskList.get(1).taskState = TaskState.RUNNING;
+			}
+			for (Task t: adminTaskList) {
+			    dao.saveOrUpdate(t);
+			}
 	    }
 	}
 	dao.saveOrUpdate(order);
@@ -115,7 +115,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
     	// SELECT task t from Task t WHERE t.orderId = :orderId and t.userId =: userId
     	List<Task> retVal = new ArrayList<Task>();
     	List<Task> allTask = dao.getAll(Task.class);
-    	// dirty hack, need correct order, sort by id
+    	// dirty hack, need field "order" in task. Now it sorted by id
     	Collections.sort(allTask, new Comparator<Task>() {
 			@Override
 			public int compare(Task o1, Task o2) {
@@ -138,41 +138,47 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
     public void resumeTask(Task task) throws MarketException {
     	Order order = dao.get(task.orderId, Order.class);
     	
-	PartOrderForUser part = null;
-	for (PartOrderForUser p : order.partOrderForUserList) {
-	    if (p.userId == task.userId) {
-		part = p;
-	    }
-	}
+		UserOrder part = null;
+		for (UserOrder p : order.userOrderList) {
+		    if (p.userId == task.userId) {
+			part = p;
+		    }
+		}
 
-	// handle admin's task
-	if (part.admin) {
+		// handle admin's task
 		if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
-			if (task.priceListUrl == null || task.priceListUrl.isEmpty()) {
-				throw new MarketException("price list url must be filled");
-			}
-			// go to next task for all users
-			for (PartOrderForUser p: order.partOrderForUserList) {
-				List<Task> taskList = getTaskList(task.orderId, p.userId);
-				for (int i = 0; i < taskList.size() - 1; i++) {
-					Task t = taskList.get(i);
-					Task tNext = taskList.get(i + 1);
-					if (t.taskName == TaskName.REQUEST_PRICE_LIST && t.taskState == TaskState.RUNNING) {
-						t.taskState = TaskState.PASSED;
-						tNext.taskState = TaskState.RUNNING;
-						dao.saveOrUpdate(t);
-						dao.saveOrUpdate(tNext);
+			if (part.admin) {
+				// admin
+				if (task.priceListUrl == null || task.priceListUrl.isEmpty()) {
+					throw new MarketException("price list url must be filled");
+				}
+				// go to next task for all users
+				for (UserOrder p: order.userOrderList) {
+					List<Task> taskList = getTaskList(task.orderId, p.userId);
+					for (int i = 0; i < taskList.size() - 1; i++) {
+						Task t = taskList.get(i);
+						Task tNext = taskList.get(i + 1);
+						if (t.taskName == TaskName.REQUEST_PRICE_LIST && t.taskState == TaskState.RUNNING) {
+							t.taskState = TaskState.PASSED;
+							tNext.taskState = TaskState.RUNNING;
+							dao.saveOrUpdate(t);
+							dao.saveOrUpdate(tNext);
+						}
 					}
 				}
+			} else {
+				// no admin
+				if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
+					throw new MarketException("task " + TaskName.REQUEST_PRICE_LIST 
+							+ " can be resumed only by admin");
+				}
 			}
-			
 			
 		} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
 		} else if (task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
 		} else if (task.taskName == TaskName.WAITING_BITTING) {
 		} else if (task.taskName == TaskName.SHIPPING) {
 		}
-	}
     }
 
     public IMarketDao getDao() {

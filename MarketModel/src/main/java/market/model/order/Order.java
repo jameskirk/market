@@ -9,7 +9,7 @@ public class Order {
 
     public int id;
 
-    public List<PartOrderForUser> partOrderForUserList;
+    public List<UserOrder> userOrderList;
 
     public OrderState orderState;
     
