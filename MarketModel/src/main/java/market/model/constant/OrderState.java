@@ -1,10 +1,9 @@
 package market.model.constant;
 
 public enum OrderState {
-    
-    RUNNUNG,
-    OMPLETED,
+
+    RUNNING,
+    COMPLETED,
     FAILED
-    
 
 }
