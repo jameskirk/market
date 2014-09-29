@@ -44,7 +44,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 	if (orderForAdmin.productList != null) {
 	    throw new MarketException("product list must be empty for admin in order");
 	}
-	orderForAdmin.admin = true;
+	orderForAdmin.organizer = true;
 	dao.saveOrUpdate(order);
 
 	// create tasks
@@ -93,7 +93,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 		if (dao.get(partOrder.userId, User.class) == null) {
 		    throw new MarketException("user must be exist in database");
 		}
-		partOrder.admin = false;
+		partOrder.organizer = false;
 
 		// add tasks for new user
 		List<Task> adminTaskList = generateDefaultTaskList(order.id, partOrder.userId);
@@ -146,7 +146,30 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 
 	// handle admin's task
 	if (task.taskName == TaskName.REQUEST_PRICE_LIST) {
-	    if (userOrder.admin) {
+	    handleRequestPriceList(order, userOrder, task);
+	} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
+	    List<Task> taskList = getTaskList(task.orderId, task.userId);
+	    for (int i = 0; i < taskList.size(); i++) {
+		if (taskList.get(i).id == task.id) {
+		    taskList.get(i).taskState = TaskState.PASSED;
+		    taskList.get(i + 1).taskState = TaskState.RUNNING;
+		    dao.saveOrUpdate(taskList.get(i));
+		    dao.saveOrUpdate(taskList.get(i + 1));
+		}
+	    }
+
+	} else if (task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
+	} else if (task.taskName == TaskName.WAITING_BITTING) {
+	} else if (task.taskName == TaskName.SHIPPING) {
+	}
+    }
+
+    public IMarketDao getDao() {
+	return dao;
+    }
+    
+    public void handleRequestPriceList(Order order, UserOrder userOrder, Task task) throws MarketException {
+	if (userOrder.organizer) {
 		// admin
 		if (task.priceListUrl == null || task.priceListUrl.isEmpty()) {
 		    throw new MarketException("price list url must be filled");
@@ -172,26 +195,7 @@ public class MarketService implements IMarketOrderService, IMarketTaskService {
 		}
 	    }
 
-	} else if (task.taskName == TaskName.CHOICE_PRODUCTS) {
-	    List<Task> taskList = getTaskList(task.orderId, task.userId);
-	    for (int i = 0; i < taskList.size(); i++) {
-		if (taskList.get(i).id == task.id) {
-		    taskList.get(i).taskState = TaskState.PASSED;
-		    taskList.get(i + 1).taskState = TaskState.RUNNING;
-		    dao.saveOrUpdate(taskList.get(i));
-		    dao.saveOrUpdate(taskList.get(i + 1));
-		}
-	    }
-
-	} else if (task.taskName == TaskName.WAITING_RESPONCE_FROM_FIRM) {
-	} else if (task.taskName == TaskName.WAITING_BITTING) {
-	} else if (task.taskName == TaskName.SHIPPING) {
-	}
-    }
-
-    public IMarketDao getDao() {
-	return dao;
-    }
+	} 
 
     private List<Task> generateDefaultTaskList(int orderId, int userId) {
 	int taskStartId = orderId * 1000 + userId * 100;

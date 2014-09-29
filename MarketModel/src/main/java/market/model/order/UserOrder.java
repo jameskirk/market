@@ -8,7 +8,7 @@ public class UserOrder {
 
     public int userId;
 
-    public boolean admin;
+    public boolean organizer;
 
     public List<ProductWithQuantity> productList;
 

@@ -34,7 +34,7 @@ public class OrderTest {
 	order.userOrderList = new ArrayList<UserOrder>();
 	UserOrder forUser = new UserOrder();
 	forUser.userId = 1;
-	forUser.admin = true;
+	forUser.organizer = true;
 	order.userOrderList.add(forUser);
 	service.createAndStartOrder(order);
 	
@@ -53,7 +53,7 @@ public class OrderTest {
     	
     	Order order = service.getOrder(1);
     	UserOrder part = new UserOrder();
-    	part.admin = false;
+    	part.organizer = false;
     	part.userId = 2;
     	order.userOrderList.add(part);
     	
