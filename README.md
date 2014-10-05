@@ -21,7 +21,10 @@ How to setup local environment and join to project:
 
 How to view/edit html pages of project:
 
+  1.go to http://zz4qvy.axshare.com/
 
+  To edit:
+  
   1.download and install axure programm http://www.axure.com/
   
   2.open axure program, file-open...- C:\Dev\market\src\market\etc\html\site.rp
