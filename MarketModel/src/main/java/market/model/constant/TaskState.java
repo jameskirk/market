@@ -3,7 +3,7 @@ package market.model.constant;
 public enum TaskState {
 
     NOT_STARTED,
-    RUNNING,
+    IN_PROGRESS,
     PASSED,
     FAILED
 
