@@ -28,3 +28,12 @@ How to view/edit html pages of project:
   1.download and install axure programm http://www.axure.com/
   
   2.open axure program, file-open...- C:\Dev\market\src\market\etc\html\site.rp
+
+-------
+
+How to start running unit tests:
+
+  1. Create the next directory: <git_home>\market\build\resource
+  2. Create the next empty files inside this directory: db.xml, db_junit.xml
+  3. You're done!
+  
