@@ -2,6 +2,25 @@
 
 @main("Welcome to Play") {
 
-    @play20.welcome(message, style = "Java")
+<script src='@routes.Assets.at("javascripts/index.js")'></script>
+
+<div class="header">
+    <div class="title">Распределенные покупки</div>
+
+    <div class="navigation">
+        <a href="javascript:void(0)" class="navigation-lnk">Как заказать</a>
+        <a href="javascript:void(0)" class="navigation-lnk">Как организовать</a>
+        <a href="javascript:void(0)" class="navigation-lnk">Как оплатить</a>
+        <a href="javascript:void(0)" class="navigation-lnk">Как получить</a>
+    </div>
+</div>
+<div class="content">
+    This is another div with different content.
+    @helper.form(action = routes.Application.addUser()) {
+        <input name="name"/>
+        <input type="submit">
+    }
+    <ul id="users"></ul>
+</div>
 
 }

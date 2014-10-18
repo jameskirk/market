@@ -1,0 +1,40 @@
+body{
+    margin:0;
+}
+
+.header {
+    height:auto;
+    background:#F0F0F0;
+    width:auto;
+    margin:0 auto;
+}
+.content {
+    width:auto;
+
+    height: 2000px;
+    margin: 10px;
+}
+
+.body {
+    text-align: center;
+}
+
+.footer {
+    text-align: center;
+}
+
+.title {
+    display: inline-block;
+    margin: 10px;
+    font-size: 40px;
+}
+
+.navigation {
+    display: inline-block;
+    float: right;
+    margin: 10px;
+}
+
+.navigation-lnk {
+    margin: 5px;
+}
