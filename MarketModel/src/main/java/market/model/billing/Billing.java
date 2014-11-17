@@ -1,5 +1,7 @@
 package market.model.billing;
 
+import market.model.order.Report;
+
 public class Billing {
     
     public int id;
@@ -9,5 +11,7 @@ public class Billing {
     public BankTransfer bankTransfer;
     
     public Double amount;
+    
+    public Report reportByOrganizer;
 
 }

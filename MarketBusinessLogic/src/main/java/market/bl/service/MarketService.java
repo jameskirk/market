@@ -6,7 +6,7 @@ import market.model.order.PurchaseOrder;
 import market.model.order.UserOrder;
 import market.model.shipping.Shipping;
 
-public interface IMarketService {
+public interface MarketService {
 
     public void createPurchaseOrder(PurchaseOrder purchaseOrder) throws MarketException;
 
@@ -15,6 +15,10 @@ public interface IMarketService {
     public void choiceShipping(Shipping shipping, int userOrderId) throws MarketException;
 
     public void choiceBilling(Billing billing, int userOrderId) throws MarketException;
+    
+    public void sayStop(int purchaseOrderId, int userId) throws MarketException;
+    
+    public void executeBilling(int userOrderId) throws MarketException;
 
     public PurchaseOrder getPurchaseOrder(int id) throws MarketException;
 

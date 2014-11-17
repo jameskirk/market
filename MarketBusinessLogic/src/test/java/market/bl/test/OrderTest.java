@@ -1,7 +1,7 @@
 package market.bl.test;
 
 import market.bl.exception.MarketException;
-import market.bl.service.impl.MarketService;
+import market.bl.service.impl.MarketServiceImpl;
 import market.model.order.PurchaseOrder;
 import market.model.order.UserOrder;
 import market.model.security.User;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderTest {
 
-    private MarketService service = new MarketService();
+    private MarketServiceImpl service = new MarketServiceImpl();
 
     @Test
     public void createAndStart() throws MarketException {
