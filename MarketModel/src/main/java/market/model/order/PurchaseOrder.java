@@ -3,9 +3,11 @@ package market.model.order;
 import java.util.Date;
 import java.util.List;
 
+import market.model.billing.Billing;
 import market.model.constant.OrderState;
+import market.model.shipping.Shipping;
 
-public class Order {
+public class PurchaseOrder {
 
     public int id;
 
@@ -24,5 +26,11 @@ public class Order {
     public boolean shippingExecuted;
 
     public Date endDate;
+    
+    public List<Product> possibleProducts;
+    
+    public Shipping possibleShipping;
+    
+    public Billing possibleBilling;
 
 }

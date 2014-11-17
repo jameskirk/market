@@ -2,7 +2,7 @@ package market.bl.test;
 
 import market.bl.exception.MarketException;
 import market.bl.service.impl.MarketService;
-import market.model.order.Order;
+import market.model.order.PurchaseOrder;
 import market.model.order.UserOrder;
 import market.model.security.User;
 import market.model.task.Task;
@@ -28,7 +28,7 @@ public class OrderTest {
         user.name = "Bob";
         service.getDao().saveOrUpdate(user);
 
-        Order order = new Order();
+        PurchaseOrder order = new PurchaseOrder();
         order.id = 1;
         order.orderState = RUNNING;
         order.userOrderList = new ArrayList<>();
@@ -36,9 +36,9 @@ public class OrderTest {
         forUser.userId = 1;
         forUser.organizer = true;
         order.userOrderList.add(forUser);
-        service.createAndStartOrder(order);
+        service.createOrder(order);
 
-        service.getOrder(1);
+        service.getPurchaseOrder(1);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class OrderTest {
         user.name = "Bill";
         service.getDao().saveOrUpdate(user);
 
-        Order order = service.getOrder(1);
+        PurchaseOrder order = service.getPurchaseOrder(1);
         UserOrder part = new UserOrder();
         part.organizer = false;
         part.userId = 2;
@@ -58,7 +58,7 @@ public class OrderTest {
 
         service.modifyOrder(order);
 
-        Order orderFromService = service.getDao().get(1, Order.class);
+        PurchaseOrder orderFromService = service.getDao().get(1, PurchaseOrder.class);
 
         assertEquals(2, orderFromService.userOrderList.size());
         assertEquals(2, orderFromService.userOrderList.get(1).userId);
