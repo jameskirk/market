@@ -29,8 +29,8 @@ public class PurchaseOrder {
     
     public List<Product> possibleProducts;
     
-    public Shipping possibleShipping;
+    public List<Shipping> possibleShipping;
     
-    public Billing possibleBilling;
+    public List<Billing> possibleBilling;
 
 }

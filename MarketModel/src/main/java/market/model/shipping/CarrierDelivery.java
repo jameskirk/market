@@ -2,8 +2,9 @@ package market.model.shipping;
 
 public class CarrierDelivery {
     
-    public int id;
+    public Address address;
     
-    public CarrierDeliveryInfo info;
-
+    public Double price;
+    
+    public String description;
 }

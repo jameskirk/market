@@ -2,8 +2,8 @@ package market.model.shipping;
 
 public class SelfDelivery {
     
-    public int id;
+    public Address address;
     
-    public SelfDeliveryInfo info;
+    public String description;
     
 }
